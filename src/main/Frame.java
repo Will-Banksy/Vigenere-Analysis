@@ -10,17 +10,23 @@ public class Frame extends JFrame {
 
 	public Frame() throws HeadlessException {
 		super();
+		init();
 	}
 
 	public Frame(GraphicsConfiguration gc) {
 		super(gc);
+		init();
 	}
-
-	public Frame(String title) throws HeadlessException {
-		super(title);
-	}
-
-	public Frame(String title, GraphicsConfiguration gc) {
-		super(title, gc);
+	
+	public void init() {
+		setTitle("Vigenere Analysis");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setMinimumSize(Dialogs.minimumDialogSize);
+		
+		// TODO: Add components
+		
+		pack();
+		setLocationRelativeTo(null);
+		setVisible(true);
 	}
 }

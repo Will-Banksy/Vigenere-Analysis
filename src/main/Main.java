@@ -1,6 +1,6 @@
 package main;
 
-import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class Main {
 	Frame frame;
@@ -10,13 +10,11 @@ public class Main {
 	}
 	
 	public void init() {
-		frame = new Frame("Vigenere Analysis");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame = new Frame();
 		
-		// TODO: Add components
-		
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		Dialogs.showInputAreaDialog(frame, "Hello, Input Text or die", (text, submitted) -> {
+			JOptionPane.showMessageDialog(frame, "Submitted: " + submitted);
+			return true;
+		});
 	}
 }
