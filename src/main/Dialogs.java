@@ -2,6 +2,7 @@ package main;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -31,7 +32,7 @@ public class Dialogs {
 		public abstract boolean handleInput(String text, boolean submitted);
 	}
 	
-	public static void showInputAreaDialog(Component parent, String title, InputAction action) {
+	public static void showInputAreaDialog(Frame parent, String title, InputAction action) {
 		showInputAreaDialog(parent, title, action, -1, false);
 	}
 
@@ -42,8 +43,8 @@ public class Dialogs {
 	 * @param id - The id of this dialog - to reuse dialogs, call this method with the same id as the one you want to reuse
 	 * @param clearText - If reusing the dialog, set to true to clear the reused dialog's text
 	 */
-	public static void showInputAreaDialog(Component parent, String title, InputAction action, int id, boolean clearText) {
-		JDialog dialog = new JDialog();
+	public static void showInputAreaDialog(Frame parent, String title, InputAction action, int id, boolean clearText) {
+		JDialog dialog = new JDialog(parent);
 		boolean fromMap = false;
 		boolean saveDialog = false;
 		if(id >= 0) {
@@ -55,6 +56,7 @@ public class Dialogs {
 		}
 		
 		if(fromMap) {
+			dialog.setTitle(title);
 			dialog.setVisible(true);
 			if(clearText) {
 				JTextArea area = cachedInputAreas.get(id);
@@ -87,10 +89,12 @@ public class Dialogs {
 			c.gridwidth = 1;
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.weighty = 0;
+			c.insets = new Insets(0, componentsSpacing, componentsSpacing, componentsSpacing);
 			dialog.add(cancel, c);
 			
 			JButton submit = new JButton("Submit");
 			c.gridx = 1;
+			c.insets = new Insets(0, 0, componentsSpacing, componentsSpacing);
 			dialog.add(submit, c);
 			
 			// So I can reference dialog inside anonymous classes
