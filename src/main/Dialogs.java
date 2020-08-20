@@ -1,23 +1,26 @@
 package main;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.HashMap;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class Dialogs {
-	private static HashMap<Integer, JDialog> cachedInputDiags = new HashMap<Integer, JDialog>();
-	private static HashMap<Integer, JTextArea> cachedInputAreas = new HashMap<Integer, JTextArea>();
+	private static HashMap<Integer, ComponentCollection> cachedInputComps = new HashMap<Integer, ComponentCollection>();
 	
 	public static int componentsSpacing = 5;
 	public static Dimension minimumDialogSize = new Dimension(400, 400);
@@ -30,6 +33,31 @@ public class Dialogs {
 		 * @return Return true to hide the controlling dialog as normal, or false to make the dialog not hide
 		 */
 		public abstract boolean handleInput(String text, boolean submitted);
+	}
+	
+	private static class ComponentCollection {
+		JDialog diag;
+		JTextArea area;
+		JButton cancel;
+		JButton submit;
+		
+		public ComponentCollection(JDialog diag, JTextArea area, JButton cancel, JButton submit) {
+			this.diag = diag;
+			this.area = area;
+			this.cancel = cancel;
+			this.submit = submit;
+		}
+	}
+	
+	private static void removeAllActionListeners(AbstractButton comp) {
+		for(ActionListener l : comp.getActionListeners()) {
+			comp.removeActionListener(l);
+		}
+	}
+	private static void removeAllWindowListeners(Window window) {
+		for(WindowListener l : window.getWindowListeners()) {
+			window.removeWindowListener(l);
+		}
 	}
 	
 	public static void showInputAreaDialog(Frame parent, String title, InputAction action) {
@@ -49,8 +77,8 @@ public class Dialogs {
 		boolean saveDialog = false;
 		if(id >= 0) {
 			saveDialog = true;
-			if(cachedInputDiags.containsKey(id)) {
-				dialog = cachedInputDiags.get(id);
+			if(cachedInputComps.containsKey(id)) {
+				dialog = cachedInputComps.get(id).diag;
 				fromMap = true;
 			}
 		}
@@ -59,11 +87,39 @@ public class Dialogs {
 			dialog.setTitle(title);
 			dialog.setVisible(true);
 			if(clearText) {
-				JTextArea area = cachedInputAreas.get(id);
+				JTextArea area = cachedInputComps.get(id).area;
 				if(area != null) {
 					area.setText("");
 				}
 			}
+			// We need to reset the event listeners - or the action we give is ignored
+			ComponentCollection comps = cachedInputComps.get(id);
+			
+			removeAllActionListeners(comps.cancel);
+			comps.cancel.addActionListener((actionEvent) -> {
+				boolean hide = action.handleInput(comps.area.getText(), false);
+				if(hide) {
+					comps.diag.setVisible(false);
+				}
+			});
+
+			removeAllActionListeners(comps.submit);
+			comps.submit.addActionListener((actionEvent) -> {
+				boolean hide = action.handleInput(comps.area.getText(), true);
+				if(hide) {
+					comps.diag.setVisible(false);
+				}
+			});
+			
+			removeAllWindowListeners(dialog);
+			dialog.addWindowListener(new WindowAdapter() {
+				@Override public void windowClosing(WindowEvent e) {
+					boolean hide = action.handleInput(comps.area.getText(), false);
+					if(hide) {
+						comps.diag.setVisible(false);
+					}
+				}
+			});
 		} else {
 			dialog.setTitle(title);
 			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -73,7 +129,6 @@ public class Dialogs {
 			GridBagConstraints c = new GridBagConstraints();
 			
 			c.insets = new Insets(componentsSpacing, componentsSpacing, componentsSpacing, componentsSpacing);
-			// TODO: Fix insets between components
 			
 			JTextArea area = new JTextArea();
 			c.gridx = 0;
@@ -131,8 +186,7 @@ public class Dialogs {
 			
 			// Save the dialog and text area to be reused
 			if(saveDialog) {
-				cachedInputDiags.put(id, dialog);
-				cachedInputAreas.put(id, area);
+				cachedInputComps.put(id, new ComponentCollection(dialog, area, cancel, submit));
 			}
 		}
 	}
