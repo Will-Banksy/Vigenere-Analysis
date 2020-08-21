@@ -5,15 +5,15 @@ import java.awt.HeadlessException;
 
 import javax.swing.JFrame;
 
-public class Frame extends JFrame {
+public class MainFrame extends JFrame {
 	private static final long serialVersionUID = 2231850685721535100L;
 
-	public Frame() throws HeadlessException {
+	public MainFrame() throws HeadlessException {
 		super();
 		init();
 	}
 
-	public Frame(GraphicsConfiguration gc) {
+	public MainFrame(GraphicsConfiguration gc) {
 		super(gc);
 		init();
 	}
