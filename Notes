@@ -1,0 +1,11 @@
+Steps for solving a Vigenere Cipher:
+	> Look for repeated sections of text to find possible keyword lengths (Kasiski examination)
+	> Loop through a few keyword lengths, and for each character in the keyword calculate the IOC for the characters that would be enciphered with that letter
+	> Do the Friedman test/Kappa test
+	> Once we have a probable keyword length, loop through all the characters, we can use the chi-squared statistic to compute the most probable Caeser shift for each character in the keyword
+
+Solving the Vigenere Cipher is much more automatable then solving the Keyword Cipher. Might be an idea to only recommend the most probable, not assume it, so the user can fill in as desired
+
+Links:
+https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher
+http://www.practicalcryptography.com/cryptanalysis/text-characterisation/chi-squared-statistic
