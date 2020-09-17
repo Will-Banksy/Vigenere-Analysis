@@ -2,6 +2,8 @@ package main;
 
 import java.util.ArrayList;
 
+import main.Utils.Struct2;
+
 public class AnalysisUtils {
 	private AnalysisUtils() {
 		throw new AssertionError("This class should not be instantiable");
@@ -48,7 +50,26 @@ public class AnalysisUtils {
 	 * @see <a href="https://en.wikipedia.org/wiki/Kasiski_examination">https://en.wikipedia.org/wiki/Kasiski_examination</a>
 	 */
 	public static ArrayList<RepeatedSequence> KasiskiTest(String text) {
-		return null; // TODO: Implement Kasiski Examination
+		ArrayList<RepeatedSequence> sequences = new ArrayList<RepeatedSequence>();
+		for(int i = 0; i < text.length() - 1; i++) {
+			ArrayList<Struct2<String, Integer[]>> list = Utils.findAllOccurrences(text, i);
+			for(Struct2<String, Integer[]> entry : list) {
+				if(entry.getObj1().length() <= 1) {
+					continue; // We don't want to test for single letters. That will just dilute the actually useful data
+				}
+				final Integer[] positions = entry.getObj2();
+				for(int j = 0; j < positions.length; j++) { // Calculate the spacing between every possible pairing
+					for(int k = j + 1; k < positions.length; k++) {
+						if(j != k) {
+							int prev = positions[j];
+							int curr = positions[k];
+							sequences.add(new RepeatedSequence(entry.getObj1(), curr - prev));
+						}
+					}
+				}
+			}
+		}
+		return sequences;
 	}
 	
 	/**
@@ -60,6 +81,7 @@ public class AnalysisUtils {
 	 * @return The most likely keyword length, as calculated by use of the above equation
 	 * @see <a href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher#Friedman_test">https://en.wikipedia.org/wiki/Vigenère_cipher#Friedman_test</a>
 	 */
+	// The only reason I'm not calling is FriedmanTest is cause then I'll have all my methods in this class starting with K which is nice
 	public static int KappaTest(String text) {
 		return 0; // TODO: Implement Kappa Test
 	}
