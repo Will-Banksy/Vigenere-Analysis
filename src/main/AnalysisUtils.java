@@ -1,6 +1,7 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import main.Utils.Struct2;
 
@@ -16,12 +17,45 @@ public class AnalysisUtils {
 	 * @see <a href="https://en.wikipedia.org/wiki/Kasiski_examination">https://en.wikipedia.org/wiki/Kasiski_examination</a>
 	 */
 	public static class RepeatedSequence {
-		public String sequence;
-		public int spacing;
+		private final String sequence;
+		private final int spacing;
+		private final Integer[] spacings;
+		private final boolean packed; // If true, use int array, if false use int
 		
 		public RepeatedSequence(String seq, int spacing) {
 			sequence = seq;
 			this.spacing = spacing;
+			spacings = null;
+			packed = false;
+		}
+		
+		public RepeatedSequence(String seq, Integer[] spacings) {
+			sequence = seq;
+			spacing = -1;
+			this.spacings = spacings;
+			packed = true;
+		}
+
+		public String getSequence() {
+			return sequence;
+		}
+
+		public int getSpacing() {
+			if(packed) {
+				throw new AssertionError("This RepeatedSequence uses the int array. So don't call this method");
+			}
+			return spacing;
+		}
+
+		public boolean isPacked() {
+			return packed;
+		}
+
+		public Integer[] getSpacings() {
+			if(!packed) {
+				throw new AssertionError("This RepeatedSequence uses the single int. So don't call this method");
+			}
+			return spacings;
 		}
 	}
 	
@@ -43,14 +77,14 @@ public class AnalysisUtils {
 	
 	/**
 	 * Searches the input text and finds repeated sections of the text. It bundles each repeat into an ArrayList that is returned as a result.<br><br>
-	 * In the ArrayList, there is a separate entry for each repetition - so if, for example, "ABC" was repeated 3 times in the text, the returned ArrayList would have 3 entries describing the repetition between the 1st & 2nd, the 1st & 3rd, and the 2nd & 3rd
+	 * In the ArrayList, there isn't a separate entry for each repetition - so if, for example, "ABC" was repeated 3 times in the text, the returned ArrayList would have 1 entry describing the repetition between the 1st & 2nd, the 1st & 3rd, and the 2nd & 3rd
 	 * @param text - The ciphertext to be examined. This should be stripped of all whitespaces/non-letter-characters such as full stops, commas, tabs and spaces
 	 * @return An ArrayList of RepeatedSequences (basically just a container for a String and an int, which are the repeated piece of text and the distance between the occurances respectively)
 	 * @see RepeatedSequence
 	 * @see <a href="https://en.wikipedia.org/wiki/Kasiski_examination">https://en.wikipedia.org/wiki/Kasiski_examination</a>
 	 */
 	public static ArrayList<RepeatedSequence> KasiskiTest(String text) {
-		ArrayList<RepeatedSequence> sequences = new ArrayList<RepeatedSequence>();
+		ArrayList<RepeatedSequence> sequencesSeparate = new ArrayList<RepeatedSequence>(); // Basically this list contains a separate entry for each repetition
 		for(int i = 0; i < text.length() - 1; i++) {
 			ArrayList<Struct2<String, Integer[]>> list = Utils.findAllOccurrences(text, i);
 			for(Struct2<String, Integer[]> entry : list) {
@@ -63,11 +97,30 @@ public class AnalysisUtils {
 						if(j != k) {
 							int prev = positions[j];
 							int curr = positions[k];
-							sequences.add(new RepeatedSequence(entry.getObj1(), curr - prev));
+							sequencesSeparate.add(new RepeatedSequence(entry.getObj1(), curr - prev));
 						}
 					}
 				}
 			}
+		}
+		// Now we 'pack' the ArrayList - we bundle together all repeats of a string
+		ArrayList<RepeatedSequence> sequences = new ArrayList<RepeatedSequence>(); // Really I should have a separate type
+		for(int i = 0; i < sequencesSeparate.size(); i++) { // Loop through all the separate sequences
+			String currSequence = sequencesSeparate.get(i).getSequence();
+			// Using a set so I don't have duplicates - Using a HashSet for speed
+			HashSet<Integer> spacings = new HashSet<Integer>();
+			spacings.add(sequencesSeparate.get(i).getSpacing());
+			for(int j = i + 1; j < sequencesSeparate.size(); j++) { // For every sequence of characters we find, we loop through the ArrayList starting at i + 1. We then find all spacings
+				if(sequencesSeparate.get(j).getSequence().equals(currSequence)) {
+					spacings.add(sequencesSeparate.get(j).getSpacing());
+					sequencesSeparate.remove(j);
+					j--;
+				}
+			}
+			sequencesSeparate.remove(i);
+			i--;
+			
+			sequences.add(new RepeatedSequence(currSequence, spacings.toArray(new Integer[spacings.size()])));
 		}
 		return sequences;
 	}
@@ -96,6 +149,6 @@ public class AnalysisUtils {
 	 * @see <a href="https://en.wikipedia.org/wiki/Index_of_coincidence">https://en.wikipedia.org/wiki/Index_of_coincidence</a>
 	 */
 	public static ArrayList<IOCForKeyLen> KappaTest2(String text) {
-		return null;
+		return null; // TODO: Implement Kappa Test 2 / Improved Kappa Test
 	}
 }

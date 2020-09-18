@@ -1,6 +1,7 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Utils {
 	private Utils() {
@@ -109,6 +110,42 @@ public class Utils {
 			if(stoppedIndexes != null) {
 				occurrenceIndexes.removeAll(stoppedIndexes);
 			}
+		}
+	}
+	
+	/**
+	 * This method concatenates two arrays
+	 * @see <a href="https://stackoverflow.com/questions/80476/how-can-i-concatenate-two-arrays-in-java">https://stackoverflow.com/questions/80476/how-can-i-concatenate-two-arrays-in-java</a>
+	 * @param <T>
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static <T> T[] concat(T[] first, T[] second) {
+		if(first == null) return second;
+		if(second == null) return first;
+		T[] result = Arrays.copyOf(first, first.length + second.length);
+		System.arraycopy(second, 0, result, first.length, second.length);
+		return result;
+	}
+	
+	/**
+	 * Returns a String array representing the numbers counting from start (inclusive) to end (exclusive)
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public static String[] count(int start, int end) {
+		if(start >= end) {
+			return null;
+		} else {
+			String[] strArr = new String[end - start];
+			int currentVal = start;
+			for(int i = 0; i < end - start; i++) {
+				strArr[i] = String.valueOf(currentVal);
+				currentVal++;
+			}
+			return strArr;
 		}
 	}
 }
