@@ -9,6 +9,7 @@ import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.util.ArrayList;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -62,9 +63,11 @@ public class MainFrame extends JFrame {
 		add(mainScrollArea, c);
 		
 		setText.addActionListener((actionEvent) -> {
+			// TODO: Add handling for non-letter characters e.g. punctuation. Just save it's positions and put it back in the deciphered text
+			// TODO: Also add handling for different case. Do the same as with non-letter characters - save position and re-apply later (meanwhile convert all characters to a single case)
 			Dialogs.showInputAreaDialog(this, "Enter Ciphertext", (text, submitted) -> {
 				if(submitted) {
-					text = text.replaceAll("\\s+",""); // Remove all whitespaces
+					text = text.replaceAll("\\s+",""); // Remove all whitespace
 					setupMainContent(text);
 				}
 				return true;
@@ -80,11 +83,12 @@ public class MainFrame extends JFrame {
 		mainContent.removeAll();
 		
 		GridBagConstraints c = new GridBagConstraints();
-		c.insets = new Insets(5, 5, 5, 5);
 		
 		JLabel ciphertextAreaLabel = new JLabel("Cipher Text");
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
+		c.insets = new Insets(5, 5, 5, 5);
+		c.gridwidth = 2;
 		mainContent.add(ciphertextAreaLabel, c);
 		
 		JTextArea ciphertextArea = new JTextArea(ciphertext);
@@ -100,13 +104,38 @@ public class MainFrame extends JFrame {
 		c.gridy = 2;
 		c.insets = new Insets(0, 5, 5, 5);
 		mainContent.add(kasiskiLabel, c);
-
+		
 		JTable table = visualiseKasiskiData(ciphertext);
+		
+		JCheckBox tableColSelect = new JCheckBox("Column Selection Mode");
+		tableColSelect.addActionListener((actionEvent) -> {
+			JCheckBox checkBox = (JCheckBox)actionEvent.getSource();
+			if(checkBox.isSelected()) {
+				table.setRowSelectionAllowed(false);
+				table.setColumnSelectionAllowed(true);
+			} else {
+				table.setColumnSelectionAllowed(false);
+				table.setRowSelectionAllowed(true);
+			}
+		});
+		c.fill = GridBagConstraints.NONE;
+		c.gridx = 1;
+		c.weightx = 0;
+		c.insets = new Insets(0, 0, 5, 5);
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.EAST;
+		mainContent.add(tableColSelect, c);
+		
 		JPanel tableContainer = new JPanel();
 		tableContainer.setLayout(new BorderLayout());
 		tableContainer.add(table.getTableHeader(), BorderLayout.NORTH);
 		tableContainer.add(table, BorderLayout.CENTER); // Need to wrap it in a JScrollPane or it doesn't show column headers
 		c.gridy = 3;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.insets = new Insets(0, 5, 5, 5);
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.CENTER;
 		mainContent.add(tableContainer, c);
 		
 		mainContent.revalidate();
