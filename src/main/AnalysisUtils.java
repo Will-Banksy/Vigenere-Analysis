@@ -10,6 +10,9 @@ public class AnalysisUtils {
 		throw new AssertionError("This class should not be instantiable");
 	}
 	
+	public static char[] alphabetLower = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+	public static char[] alphabetUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+	
 	/**
 	 * A container for a <code>String</code> and an <code>int</code> - <code>sequence</code> and <code>spacing</code> respectively.<br>
 	 * <code>sequence</code> sequence of characters, or piece of text, that was repeated.
@@ -136,7 +139,25 @@ public class AnalysisUtils {
 	 */
 	// The only reason I'm not calling is FriedmanTest is cause then I'll have all my methods in this class starting with K which is nice
 	public static int KappaTest(String text) {
-		return 0; // TODO: Implement Kappa Test
+		float Kp = 0.067f;
+		float Kr = 1f / 26f;
+		float Ko;
+		
+		float N = text.length();
+		
+		float sigma = 0;
+		
+		for(int i = 0; i < alphabetUpper.length; i++) {
+			int counti = Utils.count(alphabetUpper[i], text);
+			int ni = Math.round(((float)text.length() / (float)counti));
+			sigma += ni * (ni - 1);
+		}
+		
+		Ko = sigma / N * (N - 1);
+		
+		int keylen = Math.round((Kp - Kr) / (Ko - Kr));
+		
+		return keylen; // TODO: Implement Kappa Test
 	}
 	
 	/**

@@ -156,6 +156,7 @@ public class Dialogs {
 			c.insets = new Insets(componentsSpacing, componentsSpacing, componentsSpacing, componentsSpacing);
 			
 			JTextArea area = new JTextArea();
+			area.setTabSize(4);
 			c.gridx = 0;
 			c.gridy = 0;
 			c.gridwidth = 2;
@@ -267,6 +268,7 @@ public class Dialogs {
 			c.insets = new Insets(componentsSpacing, componentsSpacing, componentsSpacing, componentsSpacing);
 			
 			JTextArea area = new JTextArea(text);
+			area.setTabSize(4);
 			area.setEditable(editable);
 			c.fill = GridBagConstraints.BOTH;
 			c.weightx = 1;

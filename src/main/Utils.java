@@ -3,6 +3,10 @@ package main;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.table.TableColumn;
+
 public class Utils {
 	private Utils() {
 		throw new AssertionError("This class should not be instantiable");
@@ -28,6 +32,33 @@ public class Utils {
 		
 		public T2 getObj2() {
 			return ob2;
+		}
+	}
+	
+	public static class CharHolder {
+		public final char ch;
+		public final boolean hasChar;
+		public final boolean isCaps;
+		
+		public CharHolder(char ch) {
+			this.ch = Character.toLowerCase(ch);
+			this.isCaps = Character.isUpperCase(ch);
+			hasChar = true;
+		}
+		
+		public CharHolder(boolean isCaps) {
+			ch = 0;
+			this.isCaps= isCaps;
+			hasChar = false;
+		}
+		
+		public char getChar() {
+			assert hasChar;
+			if(isCaps) {
+				return Character.toUpperCase(ch);
+			} else {
+				return ch;
+			}
 		}
 	}
 	
@@ -147,5 +178,44 @@ public class Utils {
 			}
 			return strArr;
 		}
+	}
+	
+	public static int count(char ch, String str) {
+		int count = 0;
+		for(int i = 0; i < str.length(); i++) {
+			if(str.charAt(i) == ch) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	public static JPanel makeTable(Object[][] data, String[] columnNames) {
+		return makeTable(data, columnNames, null);
+	}
+	
+	public static JPanel makeTable(Object[][] data, String[] columnNames, int[] columnWidths) {
+		JPanel container = new JPanel();
+		
+		JTable table = new JTable(new NonEditableTableModel(data, columnNames));
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+		
+		if(columnWidths != null) {
+			TableColumn column = null;
+			for (int i = 0; i < Math.min(columnNames.length, columnWidths.length); i++) {
+				column = table.getColumnModel().getColumn(i);
+			    column.setPreferredWidth(columnWidths[i]);
+			}
+		}
+		
+		return container;
+	}
+	
+	public int[] repeat(int num, int count) {
+		int[] arr = new int[count];
+		for(int i = 0; i < arr.length; i++) {
+			arr[i] = num;
+		}
+		return arr;
 	}
 }

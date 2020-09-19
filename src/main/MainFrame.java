@@ -19,11 +19,19 @@ import javax.swing.JTextArea;
 import javax.swing.table.TableColumn;
 
 import main.AnalysisUtils.RepeatedSequence;
+import main.Utils.CharHolder;
 
 public class MainFrame extends JFrame {
 	private static final long serialVersionUID = 2231850685721535100L;
 	
-	public JPanel mainContent;
+	private JPanel mainContent;
+	
+	/**
+	 * This is used to store all the non-letter characters in the input ciphertext, to be reinserted in the output text.
+	 * <br>
+	 * To put the text back in the template, loop through the template and whenever you encounter the CharHolder instance not having a char, insert a character in there
+	 */
+	private CharHolder[] textTemplate;
 
 	public MainFrame() throws HeadlessException {
 		super();
@@ -65,10 +73,32 @@ public class MainFrame extends JFrame {
 		setText.addActionListener((actionEvent) -> {
 			// TODO: Add handling for non-letter characters e.g. punctuation. Just save it's positions and put it back in the deciphered text
 			// TODO: Also add handling for different case. Do the same as with non-letter characters - save position and re-apply later (meanwhile convert all characters to a single case)
+			// TODO: Also do the same for whitespace
 			Dialogs.showInputAreaDialog(this, "Enter Ciphertext", (text, submitted) -> {
 				if(submitted) {
-					text = text.replaceAll("\\s+",""); // Remove all whitespace
-					setupMainContent(text);
+					StringBuilder sb = new StringBuilder(text);
+					textTemplate = new CharHolder[sb.length()];
+					// First copy any non-letter characters from the text to the textTemplate
+					for(int i = 0; i < sb.length(); i++) {
+						if(!Character.isLetter(sb.charAt(i))) {
+							textTemplate[i] = new CharHolder(sb.charAt(i));
+						} else {
+							textTemplate[i] = new CharHolder(Character.isUpperCase(sb.charAt(i)));
+						}
+					}
+					
+					// Next remove all non-letter characters from the text
+					for(int i = 0; i < sb.length(); i++) {
+						if(!Character.isLetter(sb.charAt(i))) {
+							sb.deleteCharAt(i);
+							i--;
+						} else if(Character.isUpperCase(sb.charAt(i))) {
+							sb.setCharAt(i, Character.toUpperCase(sb.charAt(i)));
+						}
+					}
+					
+//					text = text.replaceAll("\\s+",""); // Remove all whitespace
+					setupMainContent(sb.toString(), text);
 				}
 				return true;
 			}, 0, false); // ID 0
@@ -79,7 +109,9 @@ public class MainFrame extends JFrame {
 		setVisible(true);
 	}
 	
-	public void setupMainContent(String ciphertext) { // This function is called once we've recieved the ciphertext
+	public void setupMainContent(String ciphertext, String unedited) { // This function is called once we've recieved the ciphertext
+//		System.out.println("Ciphertext: " + ciphertext + " Unedited ciphertext: " + unedited);
+		
 		mainContent.removeAll();
 		
 		GridBagConstraints c = new GridBagConstraints();
@@ -91,7 +123,8 @@ public class MainFrame extends JFrame {
 		c.gridwidth = 2;
 		mainContent.add(ciphertextAreaLabel, c);
 		
-		JTextArea ciphertextArea = new JTextArea(ciphertext);
+		JTextArea ciphertextArea = new JTextArea(unedited);
+		ciphertextArea.setTabSize(4);
 		ciphertextArea.setEditable(false);
 		JScrollPane ciphertextAreaSPane = new JScrollPane(ciphertextArea);
 		ciphertextAreaSPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
@@ -129,7 +162,7 @@ public class MainFrame extends JFrame {
 		JPanel tableContainer = new JPanel();
 		tableContainer.setLayout(new BorderLayout());
 		tableContainer.add(table.getTableHeader(), BorderLayout.NORTH);
-		tableContainer.add(table, BorderLayout.CENTER); // Need to wrap it in a JScrollPane or it doesn't show column headers
+		tableContainer.add(table, BorderLayout.CENTER);
 		c.gridy = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
@@ -174,16 +207,16 @@ public class MainFrame extends JFrame {
 		}
 		
 		JTable table = new JTable(new NonEditableTableModel(data, columnNames));
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 		TableColumn column = null;
 		for (int i = 0; i < cols; i++) {
 		    column = table.getColumnModel().getColumn(i);
 		    if (i > 0) {
-		        column.setPreferredWidth(25); //third column is bigger
+		        column.setPreferredWidth(25);
 		    } else {
 		        column.setPreferredWidth(100);
 		    }
 		}
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 		return table;
 	}
 }
